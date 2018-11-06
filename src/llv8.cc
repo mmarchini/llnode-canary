@@ -39,6 +39,7 @@ void LLV8::Load(SBTarget target) {
   js_array.Assign(target, &common);
   js_function.Assign(target, &common);
   shared_info.Assign(target, &common);
+  uncompiled_data.Assign(target, &common);
   code.Assign(target, &common);
   scope_info.Assign(target, &common);
   context.Assign(target, &common);
@@ -361,7 +362,7 @@ std::string SharedFunctionInfo::ProperName(Error& err) {
 
   std::string res = name.ToString(err);
   if (err.Fail() || res.empty()) {
-    Value inferred = InferredName(err);
+    Value inferred = GetInferredName(err);
     if (err.Fail()) return std::string();
 
     // Function may not have inferred name
@@ -773,8 +774,8 @@ Context::Locals::Locals(Context* context, Error& err) {
   Smi local_count_smi = scope_info_.ContextLocalCount(err);
   if (err.Fail()) return;
 
-  param_count_ = param_count_smi.GetValue();
-  stack_count_ = stack_count_smi.GetValue();
+  param_count_ = 0; // param_count_smi.GetValue();
+  stack_count_ = 0; // stack_count_smi.GetValue();
   local_count_ = local_count_smi.GetValue();
 }
 
