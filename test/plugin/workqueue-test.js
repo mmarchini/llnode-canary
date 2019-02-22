@@ -12,14 +12,6 @@ function testWorkqueueCommands(t, sess) {
     let match = line.match(/<Object: TCP/i);
     t.ok(match, 'TCP handler should be an Object');
 
-    sess.send('v8 getactivehandles');
-  });
-
-  sess.wait(/Timer/, (err, line) => {
-    t.error(err);
-    let match = line.match(/<Object: Timer/i);
-    t.ok(match, 'Timer handler should be an Object');
-
     sess.send('v8 getactiverequests');
   });
 
