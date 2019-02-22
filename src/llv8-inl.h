@@ -478,17 +478,8 @@ ACCESSOR(JSArrayBufferView, ByteLength,
 
 inline ScopeInfo::PositionInfo ScopeInfo::MaybePositionInfo(Error& err) {
   ScopeInfo::PositionInfo position_info = { .start_position = 0, .end_position = 0, .is_valid = false};
-  int proper_index = v8()->scope_info()->kVariablePartIndex;
-
-  if (v8()->scope_info()->kEmbeddedParamAndStackLocals) {
-    Smi param_count = ParameterCount(err);
-    if (err.Fail()) return position_info;
-    proper_index += param_count.GetValue() + 1;
-
-    Smi stack_local = StackLocalCount(err);
-    if (err.Fail()) return position_info;
-    proper_index += stack_local.GetValue();
-  }
+  int proper_index = ContextLocalIndex(err);
+  if (err.Fail()) return position_info;
 
   Smi context_local_count = ContextLocalCount(err);
   if (err.Fail()) return position_info;
@@ -515,6 +506,7 @@ inline ScopeInfo::PositionInfo ScopeInfo::MaybePositionInfo(Error& err) {
     tries--;
     proper_index++;
   }
+  return position_info;
 }
 
 // TODO(indutny): this field is a Smi on 32bit
@@ -850,26 +842,30 @@ inline Smi ScopeInfo::ContextLocalCount(Error& err) {
                               err);
 }
 
-inline String ScopeInfo::ContextLocalName(int index, int param_count,
-                                          int stack_count, Error& err) {
-  int proper_index = v8()->scope_info()->kVariablePartIndex + index;
-  if (v8()->scope_info()->kEmbeddedParamAndStackLocals)
-    proper_index += stack_count + 1 + param_count;
+inline int ScopeInfo::ContextLocalIndex(Error& err) {
+  int context_local_index = v8()->scope_info()->kVariablePartIndex;
+
+  if (v8()->scope_info()->kEmbeddedParamAndStackLocals) {
+    Smi param_count = ParameterCount(err);
+    if (err.Fail()) return -1;
+    context_local_index += param_count.GetValue() + 1;
+
+    Smi stack_local = StackLocalCount(err);
+    if (err.Fail()) return -1;
+    context_local_index += stack_local.GetValue();
+  }
+  return context_local_index;
+}
+
+inline String ScopeInfo::ContextLocalName(int index, Error& err) {
+  int proper_index = ContextLocalIndex(err) + index;
+  if (err.Fail()) return String();
   return FixedArray::Get<String>(proper_index, err);
 }
 
 inline HeapObject ScopeInfo::MaybeFunctionName(Error& err) {
-  int proper_index = v8()->scope_info()->kVariablePartIndex;
-
-  if (v8()->scope_info()->kEmbeddedParamAndStackLocals) {
-    Smi param_count = ParameterCount(err);
-    if (err.Fail()) return HeapObject();
-    proper_index += param_count.GetValue() + 1;
-
-    Smi stack_local = StackLocalCount(err);
-    if (err.Fail()) return HeapObject();
-    proper_index += stack_local.GetValue();
-  }
+  int proper_index = ContextLocalIndex(err);
+  if (err.Fail()) return HeapObject();
 
   Smi context_local_count = ContextLocalCount(err);
   if (err.Fail()) return HeapObject();

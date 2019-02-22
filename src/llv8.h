@@ -461,10 +461,10 @@ class ScopeInfo : public FixedArray {
   inline Smi ParameterCount(Error& err);
   inline Smi StackLocalCount(Error& err);
   inline Smi ContextLocalCount(Error& err);
+  inline int ContextLocalIndex(Error& err);
   inline PositionInfo MaybePositionInfo(Error& err);
 
-  inline String ContextLocalName(int index, int param_count, int stack_count,
-                                 Error& err);
+  inline String ContextLocalName(int index, Error& err);
   inline HeapObject MaybeFunctionName(Error& err);
 };
 
@@ -510,8 +510,6 @@ class Context : public FixedArray {
 
    private:
     int local_count_;
-    int param_count_;
-    int stack_count_;
     Context* context_;
     ScopeInfo scope_info_;
   };

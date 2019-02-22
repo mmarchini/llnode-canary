@@ -767,15 +767,9 @@ Context::Locals::Locals(Context* context, Error& err) {
   if (err.Fail()) return;
 
   scope_info_ = ScopeInfo(scope_obj);
-  Smi param_count_smi = scope_info_.ParameterCount(err);
-  if (err.Fail()) return;
-  Smi stack_count_smi = scope_info_.StackLocalCount(err);
-  if (err.Fail()) return;
   Smi local_count_smi = scope_info_.ContextLocalCount(err);
   if (err.Fail()) return;
 
-  param_count_ = 0; // param_count_smi.GetValue();
-  stack_count_ = 0; // stack_count_smi.GetValue();
   local_count_ = local_count_smi.GetValue();
 }
 
@@ -800,8 +794,7 @@ v8::Value Context::Locals::Iterator::operator*() {
 }
 
 String Context::Locals::Iterator::LocalName(Error& err) {
-  return outer_->scope_info_.ContextLocalName(current_, outer_->param_count_,
-                                              outer_->stack_count_, err);
+  return outer_->scope_info_.ContextLocalName(current_, err);
 }
 
 Value Context::Locals::Iterator::GetValue(Error& err) {
