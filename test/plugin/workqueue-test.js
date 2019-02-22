@@ -15,10 +15,10 @@ function testWorkqueueCommands(t, sess) {
     sess.send('v8 getactiverequests');
   });
 
-  sess.wait(/FSReqWrap/, (err, line) => {
+  sess.wait(/FSReq[a-zA-Z]*/, (err, line) => {
     t.error(err);
-    let match = line.match(/<Object: FSReqWrap/i);
-    t.ok(match, 'FSReqWrap handler should be an Object');
+    let match = line.match(/<Object: FSReq[a-zA-Z]*/i);
+    t.ok(match, 'FSReq[a-zA-Z]* handler should be an Object');
 
     sess.quit();
     t.end();
