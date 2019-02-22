@@ -363,7 +363,7 @@ std::string SharedFunctionInfo::ProperName(Error& err) {
   std::string res = name.ToString(err);
   if (err.Fail() || res.empty()) {
     Value inferred = GetInferredName(err);
-    if (err.Fail()) return std::string();
+    if (err.Fail() || inferred.raw() == -1) return std::string();
 
     // Function may not have inferred name
     if (!inferred.IsHoleOrUndefined(err) && !err.Fail())
@@ -379,7 +379,7 @@ std::string SharedFunctionInfo::ProperName(Error& err) {
 
 std::string SharedFunctionInfo::GetPostfix(Error& err) {
   Script script = GetScript(err);
-  if (err.Fail()) return std::string();
+  if (err.Fail() || script.raw() == -1) return std::string();
 
   // There is no `Script` for functions created in C++ (and possibly others)
   int64_t type = script.GetType(err);
